@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MONARCH — Table</title>
+<meta name="theme-color" content="#08070a">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-body">
+
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-crown">♔</div>
+  <div class="boot-bar"></div>
+</div>
+
+<div class="connection-banner" id="connectionBanner">Connection lost — Reconnecting…</div>
+
+<!-- Lobby (shown before both players have joined) -->
+<div class="modal-backdrop open" id="lobbyOverlay">
+  <div class="modal glass" style="max-width:460px">
+    <span class="eyebrow">Private Match</span>
+    <h3 id="lobbyTitle">Room Code</h3>
+    <p class="modal-sub" style="font-family: var(--font-mono); font-size:1.5rem; letter-spacing:0.35em; color: var(--gold-bright);" id="lobbyRoomCode">——————</p>
+
+    <div class="field-row" style="display:flex; gap:0.7rem; margin-bottom:1.6rem;">
+      <button class="btn btn-ghost" id="copyInviteBtn" style="flex:1">Copy Invite</button>
+      <button class="btn btn-ghost" id="shareBtn" style="flex:1">Share</button>
+    </div>
+
+    <div class="section-block" style="gap:0.8rem; margin-bottom:0.5rem;">
+      <div class="player-card glass">
+        <div class="avatar" id="lobbyWhiteAvatar">?</div>
+        <div class="player-meta">
+          <div class="p-name" id="lobbyWhiteName">Waiting…</div>
+          <div class="p-status">White</div>
+        </div>
+        <div class="conn-indicator"><span class="conn-dot" id="lobbyWhiteDot"></span></div>
+      </div>
+      <div class="player-card glass">
+        <div class="avatar black-avatar" id="lobbyBlackAvatar">?</div>
+        <div class="player-meta">
+          <div class="p-name" id="lobbyBlackName">Waiting for player…</div>
+          <div class="p-status">Black</div>
+        </div>
+        <div class="conn-indicator"><span class="conn-dot" id="lobbyBlackDot"></span></div>
+      </div>
+    </div>
+
+    <p class="modal-sub" id="lobbyStatusMsg">Share your room code to invite an opponent.</p>
+    <div class="error-msg" id="lobbyError"></div>
+  </div>
+</div>
+
+<!-- Top bar -->
+<div class="game-topbar">
+  <div class="wordmark"><span class="crown-glyph">♛</span> MONARCH</div>
+  <div class="room-code-pill" id="topRoomCode" title="Copy invite">
+    <span id="topRoomCodeText">——————</span>
+  </div>
+  <div class="topbar-actions">
+    <div class="conn-indicator">
+      <span class="conn-dot" id="myConnDot"></span>
+      <span id="connLabel">Connecting</span>
+    </div>
+    <button class="icon-btn" id="soundToggleBtn" title="Toggle sound">♪</button>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+  </div>
+</div>
+
+<div class="game-layout">
+  <!-- Left: players -->
+  <div class="side-panel left">
+    <div class="player-card glass" id="blackPlayerCard">
+      <div class="avatar black-avatar" id="blackAvatar">?</div>
+      <div class="player-meta">
+        <div class="p-name" id="blackName">Black</div>
+        <div class="p-status" id="blackStatus">Waiting…</div>
+      </div>
+      <div class="clock" id="blackClock">10:00</div>
+    </div>
+    <div class="section-block">
+      <div class="panel-title">Captured by Black</div>
+      <div class="captured-row" id="capturedByBlack"></div>
+    </div>
+
+    <div class="section-block" style="margin-top:auto;">
+      <div class="panel-title">Table</div>
+      <div class="control-row">
+        <button class="btn btn-ghost" id="resignBtn">Resign</button>
+        <button class="btn btn-ghost" id="drawBtn">Offer Draw</button>
+      </div>
+    </div>
+
+    <div class="player-card glass" id="whitePlayerCard">
+      <div class="avatar" id="whiteAvatar">?</div>
+      <div class="player-meta">
+        <div class="p-name" id="whiteName">White</div>
+        <div class="p-status" id="whiteStatus">Waiting…</div>
+      </div>
+      <div class="clock" id="whiteClock">10:00</div>
+    </div>
+    <div class="section-block">
+      <div class="panel-title">Captured by White</div>
+      <div class="captured-row" id="capturedByWhite"></div>
+    </div>
+  </div>
+
+  <!-- Center: 3D board -->
+  <div class="board-stage">
+    <div class="quality-badge glass" id="qualityBadge">HIGH</div>
+    <canvas id="board-canvas"></canvas>
+
+    <div class="stage-overlay">
+      <div class="match-found" id="matchFoundOverlay"><div class="mf-title">Match Found</div></div>
+      <div class="banner check-banner" id="checkBanner">Check</div>
+    </div>
+
+    <div class="camera-controls">
+      <button class="cam-btn glass" id="camResetBtn" title="Reset camera">⤾</button>
+      <button class="cam-btn glass" id="camFlipBtn" title="Flip board">⇅</button>
+    </div>
+  </div>
+
+  <!-- Right: move history -->
+  <div class="side-panel right">
+    <div class="section-block" style="flex:1; min-height:0;">
+      <div class="panel-title">Move History</div>
+      <div class="move-list" id="moveList"></div>
+    </div>
+    <div class="section-block">
+      <div class="panel-title">Game</div>
+      <div class="control-row">
+        <button class="btn btn-ghost" id="newGameBtn" style="display:none;">Rematch</button>
+        <button class="btn btn-text" id="exitGameBtn">Exit Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- Victory overlay -->
+<div class="victory-overlay" id="victoryOverlay">
+  <div class="victory-card glass">
+    <span class="eyebrow v-eyebrow" id="victoryEyebrow">Checkmate</span>
+    <h2 id="victoryWinner">White Wins</h2>
+    <p class="v-reason" id="victoryReason">By checkmate</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="exitFromVictoryBtn">Exit Table</button>
+      <button class="btn btn-primary" id="rematchBtn">Request Rematch</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promotion picker -->
+<div class="modal-backdrop" id="promotionModal">
+  <div class="modal glass" style="max-width:340px; text-align:center;">
+    <h3>Promote Pawn</h3>
+    <p class="modal-sub">Choose a piece</p>
+    <div class="control-row" id="promotionOptions" style="gap:0.8rem;"></div>
+  </div>
+</div>
+
+<!-- Settings drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="settings-drawer glass" id="settingsDrawer">
+  <h3>Settings</h3>
+
+  <div class="setting-row">
+    <label>Sound Effects</label>
+    <label class="switch"><input type="checkbox" id="setSound" checked><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <label>Graphics Quality</label>
+    <select id="setQuality">
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high" selected>High</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Camera Sensitivity</label>
+    <select id="setSensitivity">
+      <option value="0.6">Low</option>
+      <option value="1" selected>Normal</option>
+      <option value="1.6">High</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Board Theme</label>
+    <select id="setBoardTheme">
+      <option value="obsidian">Obsidian</option>
+      <option value="royalwood" selected>Royal Wood</option>
+      <option value="marble">Marble</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Piece Style</label>
+    <select id="setPieceTheme">
+      <option value="ivoryblack" selected>Ivory &amp; Black</option>
+      <option value="goldobsidian">Gold &amp; Obsidian</option>
+      <option value="silverblack">Silver &amp; Black</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Show Legal Moves</label>
+    <label class="switch"><input type="checkbox" id="setLegalMoves" checked><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <label>Confirm Moves</label>
+    <label class="switch"><input type="checkbox" id="setConfirmMove"><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <label>Animation Intensity</label>
+    <select id="setAnimIntensity">
+      <option value="subtle">Subtle</option>
+      <option value="standard" selected>Standard</option>
+      <option value="none">None (reduced motion)</option>
+    </select>
+  </div>
+
+  <button class="btn btn-ghost" id="closeSettingsBtn" style="width:100%; margin-top:1.6rem;">Close</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>

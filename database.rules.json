@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "rooms": {
+      "$roomCode": {
+        ".read": true,
+
+        "players": {
+          "white": {
+            ".write": "!data.exists() || (newData.exists() && data.child('id').val() === newData.child('id').val())"
+          },
+          "black": {
+            ".write": "!data.exists() || (newData.exists() && data.child('id').val() === newData.child('id').val())"
+          }
+        },
+
+        "fen": { ".write": true },
+        "pgn": { ".write": true },
+        "turn": { ".write": true },
+        "lastMove": { ".write": true },
+        "clocks": { ".write": true },
+        "status": { ".write": true },
+        "result": { ".write": true },
+        "drawOffer": { ".write": true },
+        "rematch": { ".write": true },
+        "rematchRoom": { ".write": true },
+        "createdAt": { ".write": "!data.exists()" },
+        "timeControl": { ".write": "!data.exists()" }
+      }
+    }
+  }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MONARCH — Premium 3D Online Chess</title>
+<meta name="description" content="Play immersive real-time chess with players around the world. A cinematic, luxury 3D chess experience built for players who appreciate the game.">
+
+<meta property="og:title" content="MONARCH — Premium 3D Online Chess">
+<meta property="og:description" content="Play immersive real-time chess with players around the world.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#08070a">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-crown">♔</div>
+  <div class="boot-bar"></div>
+</div>
+
+<nav class="nav">
+  <div class="wordmark"><span class="crown-glyph">♛</span> MONARCH</div>
+  <div class="nav-links">
+    <a href="#features">The Experience</a>
+    <a href="#themes">Boards</a>
+    <a href="#" id="navPlay">Play</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">Real-time · Cinematic · 3D</span>
+    <h1>Chess,<br><em>elevated.</em></h1>
+    <p class="sub">An immersive real-time chess experience built for players who appreciate the game. A genuine 3D board, cinematic presentation, no compromises.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" id="playOnlineBtn">Play Online</button>
+      <button class="btn btn-ghost" id="createGameBtn">Create Private Game</button>
+      <button class="btn btn-ghost" id="joinGameBtn">Join Game</button>
+    </div>
+  </div>
+  <div class="hero-stage">
+    <canvas id="hero-canvas"></canvas>
+  </div>
+  <div class="scroll-cue"><span class="line"></span> Scroll</div>
+</section>
+
+<section class="section" id="features">
+  <div class="section-head">
+    <span class="eyebrow">The Experience</span>
+    <h2>Every detail, considered.</h2>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card"><span class="num">01</span><h3>True 3D Board</h3><p>Physically modelled pieces, soft cinematic lighting, and subtle reflections — rendered in real time, not a flat sprite pretending to be one.</p></div>
+    <div class="feature-card"><span class="num">02</span><h3>Real-Time Sync</h3><p>Moves, clocks, and status update instantly across both players via a live connection — private rooms, shareable in one tap.</p></div>
+    <div class="feature-card"><span class="num">03</span><h3>Full Rulebook</h3><p>Castling, en passant, promotion, threefold repetition, the fifty-move rule — the complete game, adjudicated correctly.</p></div>
+    <div class="feature-card"><span class="num">04</span><h3>Considered Clocks</h3><p>Eight classic time controls, from bullet to classical, with quiet visual emphasis on the player to move.</p></div>
+    <div class="feature-card"><span class="num">05</span><h3>Cinematic Moments</h3><p>A match-found reveal, weighted piece movement, a check that draws the eye without shouting.</p></div>
+    <div class="feature-card"><span class="num">06</span><h3>Built to Last</h3><p>Reconnection handling, graceful errors, and an architecture ready for ratings, tournaments, and cosmetics.</p></div>
+  </div>
+</section>
+
+<section class="section" id="themes">
+  <div class="section-head">
+    <span class="eyebrow">Boards &amp; Sets</span>
+    <h2>Choose your table.</h2>
+  </div>
+  <div class="theme-strip">
+    <div class="theme-chip"><div class="swatch" style="background:linear-gradient(135deg,#1b1b1e,#0a0a0c)"></div><span>Obsidian</span></div>
+    <div class="theme-chip"><div class="swatch" style="background:linear-gradient(135deg,#6b4a2e,#3a2717)"></div><span>Royal Wood</span></div>
+    <div class="theme-chip"><div class="swatch" style="background:linear-gradient(135deg,#e8e2d4,#b9b2a0)"></div><span>Marble</span></div>
+    <div class="theme-chip"><div class="swatch" style="background:linear-gradient(135deg,#ede6d6,#1b1b1e)"></div><span>Ivory &amp; Black</span></div>
+    <div class="theme-chip"><div class="swatch" style="background:linear-gradient(135deg,#e8c77c,#1b1b1e)"></div><span>Gold &amp; Obsidian</span></div>
+    <div class="theme-chip"><div class="swatch" style="background:linear-gradient(135deg,#c9cdd6,#1b1b1e)"></div><span>Silver &amp; Black</span></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <span>© 2026 Monarch. A private table for the modern game.</span>
+  <span id="footerVersion">v1.0</span>
+</footer>
+
+<!-- Create Private Game Modal -->
+<div class="modal-backdrop" id="createModal">
+  <div class="modal glass">
+    <div class="modal-close" id="closeCreateModal">✕</div>
+    <span class="eyebrow">Private Match</span>
+    <h3>Create a table</h3>
+    <p class="modal-sub">Set the clock, then share your room code with an opponent.</p>
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="createName" maxlength="18" placeholder="Enter your name">
+    </div>
+    <div class="field">
+      <label>Time Control</label>
+      <div class="time-control-grid" id="createTimeControls"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="confirmCreate" style="flex:1">Create Room</button>
+    </div>
+    <div class="error-msg" id="createError"></div>
+  </div>
+</div>
+
+<!-- Join Game Modal -->
+<div class="modal-backdrop" id="joinModal">
+  <div class="modal glass">
+    <div class="modal-close" id="closeJoinModal">✕</div>
+    <span class="eyebrow">Join Table</span>
+    <h3>Enter room code</h3>
+    <p class="modal-sub">Ask your opponent for their 6-character invite code.</p>
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="joinName" maxlength="18" placeholder="Enter your name">
+    </div>
+    <div class="field">
+      <label>Room Code</label>
+      <input type="text" id="joinCode" class="join-code-input" maxlength="6" placeholder="X7K9P2">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="confirmJoin" style="flex:1">Join Room</button>
+    </div>
+    <div class="error-msg" id="joinError"></div>
+  </div>
+</div>
+
+<!-- Play Online (quick matchmaking placeholder -> creates open room) -->
+<div class="modal-backdrop" id="playModal">
+  <div class="modal glass">
+    <div class="modal-close" id="closePlayModal">✕</div>
+    <span class="eyebrow">Play Online</span>
+    <h3>Find an opponent</h3>
+    <p class="modal-sub">Create an open table and share the link, or jump into a table a friend has open. Matchmaking against strangers requires a live player pool — with one browser tab this creates a shareable table instead.</p>
+    <div class="field">
+      <label>Your Name</label>
+      <input type="text" id="playName" maxlength="18" placeholder="Enter your name">
+    </div>
+    <div class="field">
+      <label>Time Control</label>
+      <div class="time-control-grid" id="playTimeControls"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="confirmPlay" style="flex:1">Create &amp; Share Table</button>
+    </div>
+    <div class="error-msg" id="playError"></div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

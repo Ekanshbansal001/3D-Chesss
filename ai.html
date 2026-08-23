@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MONARCH — vs Computer</title>
+<meta name="theme-color" content="#08070a">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body class="game-body">
+
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-crown">♔</div>
+  <div class="boot-bar"></div>
+</div>
+
+<!-- Top bar -->
+<div class="game-topbar">
+  <div class="wordmark"><span class="crown-glyph">♛</span> MONARCH</div>
+  <div class="room-code-pill" id="modePill" title="Difficulty">
+    <span id="modePillText">vs Computer · Medium</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="icon-btn" id="soundToggleBtn" title="Toggle sound">♪</button>
+    <button class="icon-btn" id="settingsBtn" title="Settings">⚙</button>
+  </div>
+</div>
+
+<div class="game-layout">
+  <!-- Left: players -->
+  <div class="side-panel left">
+    <div class="player-card glass" id="topPlayerCard">
+      <div class="avatar black-avatar" id="topAvatar">♛</div>
+      <div class="player-meta">
+        <div class="p-name" id="topName">Monarch AI</div>
+        <div class="p-status" id="topStatus">Thinking…</div>
+      </div>
+    </div>
+    <div class="section-block">
+      <div class="panel-title" id="topCapturedLabel">Captured by AI</div>
+      <div class="captured-row" id="capturedByTop"></div>
+    </div>
+
+    <div class="section-block" style="margin-top:auto;">
+      <div class="panel-title">Table</div>
+      <div class="control-row">
+        <button class="btn btn-ghost" id="resignBtn">Resign</button>
+        <button class="btn btn-ghost" id="undoBtn">Undo Move</button>
+      </div>
+    </div>
+
+    <div class="player-card glass" id="bottomPlayerCard">
+      <div class="avatar" id="bottomAvatar">?</div>
+      <div class="player-meta">
+        <div class="p-name" id="bottomName">You</div>
+        <div class="p-status" id="bottomStatus">Your move</div>
+      </div>
+    </div>
+    <div class="section-block">
+      <div class="panel-title" id="bottomCapturedLabel">Captured by You</div>
+      <div class="captured-row" id="capturedByBottom"></div>
+    </div>
+  </div>
+
+  <!-- Center: 3D board -->
+  <div class="board-stage">
+    <div class="quality-badge glass" id="qualityBadge">HIGH</div>
+    <canvas id="board-canvas"></canvas>
+
+    <div class="stage-overlay">
+      <div class="match-found" id="matchFoundOverlay"><div class="mf-title">Your Move</div></div>
+      <div class="banner check-banner" id="checkBanner">Check</div>
+      <div class="banner" id="thinkingBanner" style="border:1px solid var(--gold); color: var(--gold-bright); background: rgba(201,164,92,0.08);">Monarch is thinking…</div>
+    </div>
+
+    <div class="camera-controls">
+      <button class="cam-btn glass" id="camResetBtn" title="Reset camera">⤾</button>
+      <button class="cam-btn glass" id="camFlipBtn" title="Flip board">⇅</button>
+    </div>
+  </div>
+
+  <!-- Right: move history -->
+  <div class="side-panel right">
+    <div class="section-block" style="flex:1; min-height:0;">
+      <div class="panel-title">Move History</div>
+      <div class="move-list" id="moveList"></div>
+    </div>
+    <div class="section-block">
+      <div class="panel-title">Game</div>
+      <div class="control-row">
+        <button class="btn btn-text" id="exitGameBtn">Exit Table</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- Victory overlay -->
+<div class="victory-overlay" id="victoryOverlay">
+  <div class="victory-card glass">
+    <span class="eyebrow v-eyebrow" id="victoryEyebrow">Checkmate</span>
+    <h2 id="victoryWinner">You Win</h2>
+    <p class="v-reason" id="victoryReason">By checkmate</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="exitFromVictoryBtn">Exit Table</button>
+      <button class="btn btn-primary" id="rematchBtn">New Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promotion picker -->
+<div class="modal-backdrop" id="promotionModal">
+  <div class="modal glass" style="max-width:340px; text-align:center;">
+    <h3>Promote Pawn</h3>
+    <p class="modal-sub">Choose a piece</p>
+    <div class="control-row" id="promotionOptions" style="gap:0.8rem;"></div>
+  </div>
+</div>
+
+<!-- Settings drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="settings-drawer glass" id="settingsDrawer">
+  <h3>Settings</h3>
+
+  <div class="setting-row">
+    <label>Sound Effects</label>
+    <label class="switch"><input type="checkbox" id="setSound" checked><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <label>Graphics Quality</label>
+    <select id="setQuality">
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high" selected>High</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Camera Sensitivity</label>
+    <select id="setSensitivity">
+      <option value="0.6">Low</option>
+      <option value="1" selected>Normal</option>
+      <option value="1.6">High</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Board Theme</label>
+    <select id="setBoardTheme">
+      <option value="obsidian">Obsidian</option>
+      <option value="royalwood" selected>Royal Wood</option>
+      <option value="marble">Marble</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Piece Style</label>
+    <select id="setPieceTheme">
+      <option value="ivoryblack" selected>Ivory &amp; Black</option>
+      <option value="goldobsidian">Gold &amp; Obsidian</option>
+      <option value="silverblack">Silver &amp; Black</option>
+    </select>
+  </div>
+  <div class="setting-row">
+    <label>Show Legal Moves</label>
+    <label class="switch"><input type="checkbox" id="setLegalMoves" checked><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <label>Confirm Moves</label>
+    <label class="switch"><input type="checkbox" id="setConfirmMove"><span class="slider"></span></label>
+  </div>
+  <div class="setting-row">
+    <label>Animation Intensity</label>
+    <select id="setAnimIntensity">
+      <option value="subtle">Subtle</option>
+      <option value="standard" selected>Standard</option>
+      <option value="none">None (reduced motion)</option>
+    </select>
+  </div>
+
+  <button class="btn btn-ghost" id="closeSettingsBtn" style="width:100%; margin-top:1.6rem;">Close</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/ai-game.js"></script>
+</body>
+</html>
